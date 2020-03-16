@@ -28,5 +28,12 @@ import { AngularFirestoreModule } from '@angular/fire/firestore';
 
 })
 export class AppModule { 
-	constructor()
+	constructor(private injector: Injector){}
+
+	ngDoBootstrap(){
+		
+		const el = createCustomElement(SignupFormComponent, { injector: this.injector });
+
+		customElements.define('signup-form', el);
+	}
 }
