@@ -1,16 +1,32 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { NgModule, Injector } from '@angular/core';
+
+import { createCustomElement } from '@angular/elements';
 
 import { AppComponent } from './app.component';
+import { SignupFormComponent } from './signup-form/signup-form.component';
+
+import { AngularFireModule } from '@angular/fire';
+import { environment } from '../environments/environment';
+
+import { AngularFirestoreModule } from '@angular/fire/firestore';
+
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    SignupFormComponent
   ],
   imports: [
-    BrowserModule
+    BrowserModule,
+    AngularFireModule.initializeApp(environment.firebase),
+    AngularFirestoreModule
   ],
-  providers: [],
-  bootstrap: [AppComponent]
+  entryComponents: [
+  	SignupFormComponent
+  ]
+
 })
-export class AppModule { }
+export class AppModule { 
+	constructor()
+}
