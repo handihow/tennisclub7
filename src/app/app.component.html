@@ -1,20 +1,19 @@
-<!--The content below is only a placeholder and can be replaced.-->
-<div style="text-align:center">
-  <h1>
-    Welcome to {{ title }}!
-  </h1>
-  <img width="300" alt="Angular Logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTAgMjUwIj4KICAgIDxwYXRoIGZpbGw9IiNERDAwMzEiIGQ9Ik0xMjUgMzBMMzEuOSA2My4ybDE0LjIgMTIzLjFMMTI1IDIzMGw3OC45LTQzLjcgMTQuMi0xMjMuMXoiIC8+CiAgICA8cGF0aCBmaWxsPSIjQzMwMDJGIiBkPSJNMTI1IDMwdjIyLjItLjFWMjMwbDc4LjktNDMuNyAxNC4yLTEyMy4xTDEyNSAzMHoiIC8+CiAgICA8cGF0aCAgZmlsbD0iI0ZGRkZGRiIgZD0iTTEyNSA1Mi4xTDY2LjggMTgyLjZoMjEuN2wxMS43LTI5LjJoNDkuNGwxMS43IDI5LjJIMTgzTDEyNSA1Mi4xem0xNyA4My4zaC0zNGwxNy00MC45IDE3IDQwLjl6IiAvPgogIDwvc3ZnPg==">
-</div>
-<h2>Here are some links to help you start: </h2>
-<ul>
-  <li>
-    <h2><a target="_blank" rel="noopener" href="https://angular.io/tutorial">Tour of Heroes</a></h2>
-  </li>
-  <li>
-    <h2><a target="_blank" rel="noopener" href="https://angular.io/cli">CLI Documentation</a></h2>
-  </li>
-  <li>
-    <h2><a target="_blank" rel="noopener" href="https://blog.angular.io/">Angular blog</a></h2>
-  </li>
-</ul>
-
+<article class="size_restricted" >
+  <section *ngIf="auth.user | async as user; else showLogin">
+    <div class='survey-container contentcontainer codecontainer'><div id='surveyElement'></div></div>
+    <div *ngIf="isDone">
+      <button (click)="logout()" type="button" class="btn-lg btn-primary">Nog een keer inschrijven</button>
+    </div>
+  </section>
+  <ng-template #showLogin>
+    <section class="jumbotron" >
+      <h1 class="display-4">Inschrijven</h1>
+      <p class="lead">
+        Ja! Ik wil lid worden van Tennisclub7.
+      </p>
+      <hr class="my-4">
+      <p>Klik op de knop om door te gaan naar het inschrijfformulier.</p>
+      <button (click)="login()" type="button" class="btn-lg btn-primary">Inschrijven</button>
+    </section>
+  </ng-template>
+</article>
