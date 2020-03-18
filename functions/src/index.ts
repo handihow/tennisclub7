@@ -11,6 +11,28 @@ export const sendEmails = functions.firestore.document('registrations/{id}').onW
 		//set the api key for sendgrid
 		sgMail.setApiKey(functions.config().sendgrid.key);
 		const data = newValue.data;
+		let attachments = [];
+		try{
+			const image = data.image;
+			const signature : string = data.signature;
+			const signatureBase64 = signature.split(',')[1];
+			const signatureFileType = signature.split(',')[0].split(';')[0].split(':')[1];
+			const signatureFileName = data.firstName + '_' + data.lastName + '_' + 'handtekening.png'
+			attachments.push({
+		      content: image[0].content.split(',')[1],
+		      filename: image[0].name,
+		      type: image[0].type,
+		      disposition: "attachment"
+		    });
+		    attachments.push({
+		    	content: signatureBase64,
+		    	filename: signatureFileName,
+		    	type: signatureFileType,
+		    	disposition: "attachment"
+		    });
+		} catch(e){
+			console.error(e.toString());
+		}
 		const dynamicData = {
 			  email: data.email,
 	          firstName: data.firstName,
@@ -23,7 +45,6 @@ export const sendEmails = functions.firestore.document('registrations/{id}').onW
 	          mobilePhoneNumber: data.mobilePhoneNumber,
 	          membershipType: data.membershipType,
 	          date: dateFormat(data.date, "d-m-yyyy"),
-	          imageUrl: data.image && data.image[0] && data.image[0].content ? data.image[0].content : 'https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_1280.png',
 	          signedBy: data.signedBy,
 	          placeSigned: data.placeSigned,
 	          dateSigned: dateFormat(data.dateSigned, "d-m-yyyy"),
@@ -36,14 +57,16 @@ export const sendEmails = functions.firestore.document('registrations/{id}').onW
 			from: 'no-reply@tennisclub7.nl',
 			fromname: 'Ledenadministratie Tennisclub7',
 			templateId: 'd-06de23332fd04c43a1258a1c99f090bb',
-			dynamic_template_data: dynamicData
+			dynamic_template_data: dynamicData,
+			attachments: attachments
 		};
 		const msgToAdministration = {
-			to: 'roeland@handihow.com',
+			to: 'ewoudverbakel@gmail.com',
 			from: 'no-reply@tennisclub7.nl',
 			fromname: 'Ledenadministratie Tennisclub7',
 			templateId: 'd-08a21deec3c9430ab552406395ed0c61',
-			dynamic_template_data: dynamicData
+			dynamic_template_data: dynamicData,
+			attachments: attachments
 		}
 	    return sgMail.send(msgToAdministration)
 		    .then(() => {

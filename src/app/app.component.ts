@@ -14,8 +14,6 @@ import { AngularFireStorage, AngularFireUploadTask } from '@angular/fire/storage
 
 import { Subscription } from 'rxjs';
 
-
-//widgets.emotionsratings(Survey);
 widgets.signaturepad(Survey);
 
 Survey.JsonObject.metaData.addProperty('questionbase', 'popupdescription:text');
@@ -197,17 +195,16 @@ export class AppComponent implements OnInit {
 	      "nl": "Laat leeg als je jouw speelsterkte niet weet"
 	     },
 	     "choices": [
-	      "1",
-	      "2",
 	      "3",
 	      "4",
 	      "5",
 	      "6",
 	      "7",
 	      "8",
-	      "9"
+	      "9",
+	      "weet niet"
 	     ],
-	     "colCount": 3
+	     "colCount": 2
 	    },
 	    {
 	     "type": "radiogroup",
@@ -220,17 +217,16 @@ export class AppComponent implements OnInit {
 	      "nl": "Laat leeg als je jouw speelsterkte niet weet"
 	     },
 	     "choices": [
-	      "1",
-	      "2",
 	      "3",
 	      "4",
 	      "5",
 	      "6",
 	      "7",
 	      "8",
-	      "9"
+	      "9",
+	      "weet niet"
 	     ],
-	     "colCount": 3
+	     "colCount": 2
 	    }
 	   ],
 	   "title": {
@@ -249,7 +245,7 @@ export class AppComponent implements OnInit {
 	     "description": {
 	      "nl": "Upload een recente pasfoto voor je ledenpas"
 	     },
-	     "storeDataAsText": false,
+	     "storeDataAsText": true,
 	     "isRequired": true,
 	     "imageWidth": "150",
 	     "acceptedTypes": "image/*",
