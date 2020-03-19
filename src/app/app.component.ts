@@ -304,8 +304,8 @@ export class AppComponent implements OnInit {
 	      "nl": "Handtekening"
 	     },
 	     "isRequired": true,
-	     "description": "Teken je handtekening in de box",
-     	 "requiredErrorText": "Teken je handtekening in de box"
+	     "description": "Teken je handtekening in de ruimte hieronder",
+     	 "requiredErrorText": "Teken je handtekening in de ruimte onder de vraag met je muis, of als je een touchscreen hebt, met je vinger"
 	    }
 	   ],
 	   "title": {
