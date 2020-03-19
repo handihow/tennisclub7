@@ -181,8 +181,9 @@ export class AppComponent implements OnInit {
 	      "Junior 13 t/m 14 jaar € 80,-- per jaar",
 	      "Junior 15 t/m 17 jaar € 100,-- per jaar",
 	      "Senior 18 t/m 22 jaar € 175,-- per jaar",
-	      "Senior 22 tot 88+ jaar € 215,-- per jaar ",
-	      "Daglid senior maandag t/m vrijdag spelen € 160,-- per jaar"
+	      "Senior 22 tot 88+ jaar € 215,-- per jaar",
+	      "Daglid senior maandag t/m vrijdag spelen € 160,-- per jaar",
+	      "Winterlid spelen van 01-10 tot en met 31-03  € 90,-- per jaar"
 	     ]
 	    },
 	    {
@@ -302,7 +303,9 @@ export class AppComponent implements OnInit {
 	     "title": {
 	      "nl": "Handtekening"
 	     },
-	     "isRequired": true
+	     "isRequired": true,
+	     "description": "Teken je handtekening in de box",
+     	 "requiredErrorText": "Teken je handtekening in de box"
 	    }
 	   ],
 	   "title": {
