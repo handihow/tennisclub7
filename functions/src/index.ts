@@ -9,9 +9,8 @@ const dateFormat = require('dateformat');
 const db = admin.firestore();
 const Excel = require('exceljs');
 
-const adminEmailAddress = 'ewoudverbakel@gmail.com'
+const adminEmailAddress = 'ledenadministratie@tennisclub7.nl'
 
-// ledenadministratie@tennisclub7.nl
 
 export const sendEmails = functions.firestore.document('registrations/{id}').onWrite(async (change, context) => {
 	const newValue = change.after.data();
