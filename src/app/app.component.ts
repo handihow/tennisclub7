@@ -246,7 +246,7 @@ export class AppComponent implements OnInit {
 	     "description": {
 	      "nl": "Upload een recente pasfoto voor je ledenpas"
 	     },
-	     "storeDataAsText": true,
+	     "storeDataAsText": false,
 	     "isRequired": true,
 	     "imageWidth": "150",
 	     "acceptedTypes": "image/*",

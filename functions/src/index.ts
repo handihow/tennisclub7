@@ -2,10 +2,16 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 admin.initializeApp(functions.config().firebase);
 
+import axios from 'axios';
+
 const sgMail = require('@sendgrid/mail');
 const dateFormat = require('dateformat');
 const db = admin.firestore();
 const Excel = require('exceljs');
+
+const adminEmailAddress = 'ewoudverbakel@gmail.com'
+
+// ledenadministratie@tennisclub7.nl
 
 export const sendEmails = functions.firestore.document('registrations/{id}').onWrite(async (change, context) => {
 	const newValue = change.after.data();
@@ -17,19 +23,22 @@ export const sendEmails = functions.firestore.document('registrations/{id}').onW
 		const attachmentsToMember = [];
 		const attachmentsToAdministration = []
 		try{
-			const image = data.image;
+			const image = data.image[0];
+			if(image && image.content){
+				const imageBase64 = await getImageAsBuffer(image.content);
+				const imageAttachment = {
+			      content: imageBase64,
+			      filename: image.name,
+			      type: image.type,
+			      disposition: "attachment"
+			    };
+				attachmentsToMember.push(imageAttachment);
+				attachmentsToAdministration.push(imageAttachment);
+			}
 			const signature : string = data.signature;
 			const signatureBase64 = signature.split(',')[1];
 			const signatureFileType = signature.split(',')[0].split(';')[0].split(':')[1];
 			const signatureFileName = data.firstName + '_' + data.lastName + '_' + 'handtekening.png'
-			const imageAttachment = {
-		      content: image[0].content.split(',')[1],
-		      filename: image[0].name,
-		      type: image[0].type,
-		      disposition: "attachment"
-		    };
-			attachmentsToMember.push(imageAttachment);
-			attachmentsToAdministration.push(imageAttachment);
 			const signatureAttachment = {
 		    	content: signatureBase64,
 		    	filename: signatureFileName,
@@ -50,22 +59,22 @@ export const sendEmails = functions.firestore.document('registrations/{id}').onW
 			}
 		} catch(e){
 			console.error(e.toString());
-		}
+		}		
 		const dynamicData = {
 			  email: data.email,
 	          firstName: data.firstName,
 	          lastName: data.lastName,
 	          gender: data.gender,
-	          birthDate: dateFormat(data.birthDate, "d-m-yyyy"),
+	          birthDate: safeDateTransform(data.birthDate),
 	          address: data.address,
 	          postalCode: data.postalCode,
 	          city: data.city,
 	          mobilePhoneNumber: data.mobilePhoneNumber,
 	          membershipType: data.membershipType,
-	          date: dateFormat(data.date, "d-m-yyyy"),
+	          date: safeDateTransform(data.date),
 	          signedBy: data.signedBy,
 	          placeSigned: data.placeSigned,
-	          dateSigned: dateFormat(data.dateSigned, "d-m-yyyy"),
+	          dateSigned: safeDateTransform(data.dateSigned),
 	          currentRatingSingles: data.currentRatingSingles ? data.currentRatingSingles : '-',
 	          currentRatingDoubles: data.currentRatingDoubles ? data.currentRatingDoubles : '-'
         };
@@ -79,7 +88,7 @@ export const sendEmails = functions.firestore.document('registrations/{id}').onW
 			attachments: attachmentsToMember
 		};
 		const msgToAdministration = {
-			to: 'ledenadministratie@tennisclub7.nl',
+			to: adminEmailAddress,
 			from: 'no-reply@tennisclub7.nl',
 			fromname: 'Ledenadministratie Tennisclub7',
 			templateId: 'd-08a21deec3c9430ab552406395ed0c61',
@@ -108,6 +117,16 @@ export const sendEmails = functions.firestore.document('registrations/{id}').onW
 	}
 
 })
+
+const safeDateTransform = (date: string) : string => {
+	let safeDateString = '';
+	try {
+		 safeDateString = dateFormat(date, "d-m-yyyy")
+	} catch(e){
+		safeDateString = date;
+	}
+	return safeDateString
+}
 
 const createExcel = async () => {
 	const registrationSnap = await db.collection('registrations').orderBy('updatedAt', 'asc').get();
@@ -142,13 +161,13 @@ const createExcel = async () => {
 	          firstName: data.firstName,
 	          lastName: data.lastName,
 	          gender: data.gender,
-	          birthDate: dateFormat(data.birthDate, "d-m-yyyy"),
+	          birthDate: safeDateTransform(data.birthDate),
 	          address: data.address,
 	          postalCode: data.postalCode,
 	          city: data.city,
 	          mobilePhoneNumber: data.mobilePhoneNumber,
 	          membershipType: data.membershipType,
-	          date: dateFormat(data.date, "d-m-yyyy"),
+	          date: safeDateTransform(data.date),
 	          currentRatingSingles: data.currentRatingSingles ? data.currentRatingSingles : '-',
 	          currentRatingDoubles: data.currentRatingDoubles ? data.currentRatingDoubles : '-'
 			});
@@ -159,4 +178,19 @@ const createExcel = async () => {
 		});
 	}
 }
+
+const getImageAsBuffer = function(url: string) : Promise<string> {
+	return new Promise((resolve, reject) => {
+		axios.get(url, {responseType: 'arraybuffer'})
+			.then(response => {
+		        const imageBuffer : Buffer = Buffer.from(response.data);
+		        const base64EncodedBuffer : string = imageBuffer.toString('base64');
+		        resolve(base64EncodedBuffer);
+			})
+			.catch(err => {
+				reject(null);
+			});
+	});
+}
+
 
