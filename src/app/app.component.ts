@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewEncapsulation } from '@angular/core';
 
 import { AngularFirestore } from '@angular/fire/firestore';
 import { AngularFireAuth } from '@angular/fire/auth';
@@ -27,12 +27,13 @@ Survey.StylesManager.applyTheme("bootstrap");
   styleUrls: ['./app.component.scss'],
   encapsulation: ViewEncapsulation.Emulated
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   title = 'Tennisclub7 inschrijven';
 
   json: any;
   result: any;
   surveyModel: any;
+  form: Subscription;
   sub: Subscription;
   userId: string;
   isDone: boolean;
@@ -40,289 +41,27 @@ export class AppComponent implements OnInit {
   constructor(private db: AngularFirestore, public auth: AngularFireAuth, public storage: AngularFireStorage) { }
 
   ngOnInit() {
-  	this.json = {
-	 "locale": "nl",
-	 "title": "Aanmeldingsformulier Tennisclub7",
-	 "completedHtml": {
-	  "nl": "<img alt='YES' src='https://tennisclub7.nl/wp-content/uploads/2016/03/Lake7-Zevensprong-1.png' width='100%' height='auto'><div style='padding:10px'><h3>Bedankt voor de aanmelding!</h3>\n<p>Je aanmelding is ontvangen en wordt automatisch verzonden naar de ledenadministratie. </p>\n<p>Je ontvangt een bevestiging van je aanmelding op het email adres dat je hebt opgegeven.</p>\n<p>De ledenadministratie zal contact met je opnemen zodra de aanmelding is verwerkt.</p></div>"
-	 },
-	 "pages": [
-	  {
-	   "name": "personalInformation",
-	   "elements": [
-	    {
-	     "type": "radiogroup",
-	     "name": "gender",
-	     "title": "Geslacht",
-	     "isRequired": true,
-	     "choices": [
-	      "Man",
-	      "Vrouw",
-	      "Genderneutraal"
-	     ]
-	    },
-	    {
-	     "type": "text",
-	     "name": "date",
-	     "startWithNewLine": false,
-	     "title": "Lid per",
-	     "isRequired": true,
-	     "validators": [
-	     	{
-	     		"type": "expression", 
-	     		"expression": "isDateMoreThanCurrent({date}) = true", 
-	     		"text": "De datum mag niet in het verleden liggen"
-	     	}
-	     ],
-	     "inputType": "date"
-	    },
-	    {
-	     "type": "text",
-	     "name": "lastName",
-	     "title": {
-	      "nl": "Achternaam"
-	     },
-	     "isRequired": true
-	    },
-	    {
-	     "type": "text",
-	     "name": "firstName",
-	     "startWithNewLine": false,
-	     "title": {
-	      "nl": "Voornaam/voorletters"
-	     },
-	     "isRequired": true
-	    },
-	    {
-	     "type": "text",
-	     "name": "birthDate",
-	     "title": {
-	      "nl": "Geboortedatum"
-	     },
-	     "isRequired": true,
-	     "inputType": "date"
-	    }
-	   ],
-	   "title": "Persoonlijke gegevens"
-	  },
-	  {
-	   "name": "addressInformation",
-	   "elements": [
-	    {
-	     "type": "text",
-	     "name": "address",
-	     "title": {
-	      "nl": "Adres en huisnummer"
-	     },
-	     "isRequired": true
-	    },
-	    {
-	     "type": "text",
-	     "name": "postalCode",
-	     "title": {
-	      "nl": "Postcode"
-	     },
-	     "isRequired": true
-	    },
-	    {
-	     "type": "text",
-	     "name": "city",
-	     "startWithNewLine": false,
-	     "title": {
-	      "nl": "Woonplaats"
-	     },
-	     "isRequired": true
-	    },
-	    {
-	     "type": "text",
-	     "name": "mobilePhoneNumber",
-	     "title": {
-	      "nl": "Mobiel telefoonnummer"
-	     },
-	     "isRequired": true
-	    },
-	    {
-	     "type": "text",
-	     "name": "phoneNumber",
-	     "startWithNewLine": false,
-	     "title": {
-	      "nl": "Telefoonnummer"
-	     }
-	    },
-	    {
-	     "type": "text",
-	     "name": "email",
-	     "title": {
-	      "nl": "Email adres"
-	     },
-	     "isRequired": true,
-	     "inputType": "email"
-	    }
-	   ],
-	   "title": {
-	    "nl": "Adres en contactgegevens"
-	   }
-	  },
-	  {
-	   "name": "membership",
-	   "elements": [
-	    {
-	     "type": "radiogroup",
-	     "name": "membershipType",
-	     "title": {
-	      "nl": "Als welk lid wenst u te worden ingeschreven"
-	     },
-	     "description": {
-	      "nl": "Bepalend is de leeftijd die men in het kalenderjaar bereikt, e.e.a. conform richtlijnen KNLTB"
-	     },
-	     "isRequired": true,
-	     "choices": [
-	      "Junior t/m 12 jaar € 55,-- per jaar ",
-	      "Junior 13 t/m 14 jaar € 80,-- per jaar",
-	      "Junior 15 t/m 17 jaar € 100,-- per jaar",
-	      "Senior 18 t/m 22 jaar € 175,-- per jaar",
-	      "Senior 22 tot 88+ jaar € 215,-- per jaar",
-	      "Daglid senior maandag t/m vrijdag spelen € 160,-- per jaar",
-	      "Winterlid spelen van 01-10 tot en met 31-03  € 90,-- per jaar"
-	     ]
-	    },
-	    {
-	     "type": "radiogroup",
-	     "name": "currentRatingSingles",
-	     "title": {
-	      "nl": "Speelsterkte enkel"
-	     },
-	     "description": {
-	      "nl": "Laat leeg als je jouw speelsterkte niet weet"
-	     },
-	     "choices": [
-	      "3",
-	      "4",
-	      "5",
-	      "6",
-	      "7",
-	      "8",
-	      "9",
-	      "weet niet"
-	     ],
-	     "colCount": 2
-	    },
-	    {
-	     "type": "radiogroup",
-	     "name": "currentRatingDoubles",
-	     "startWithNewLine": false,
-	     "title": {
-	      "nl": "Speelsterkte dubbel"
-	     },
-	     "description": {
-	      "nl": "Laat leeg als je jouw speelsterkte niet weet"
-	     },
-	     "choices": [
-	      "3",
-	      "4",
-	      "5",
-	      "6",
-	      "7",
-	      "8",
-	      "9",
-	      "weet niet"
-	     ],
-	     "colCount": 2
-	    }
-	   ],
-	   "title": {
-	    "nl": "Lidmaatschap"
-	   }
-	  },
-	  {
-	   "name": "picture",
-	   "elements": [
-	    {
-	     "type": "file",
-	     "name": "image",
-	     "title": {
-	      "nl": "Pasfoto"
-	     },
-	     "description": {
-	      "nl": "Upload een recente pasfoto voor je ledenpas"
-	     },
-	     "storeDataAsText": false,
-	     "isRequired": true,
-	     "imageWidth": "150",
-	     "acceptedTypes": "image/*",
-	     "waitForUpload": true,
-	     "maxSize": 10240000
-	    }
-	   ],
-	   "title": {
-	    "nl": "Pasfoto"
-	   }
-	  },
-	  {
-	   "name": "signatures",
-	   "elements": [
-	    {
-	     "type": "text",
-	     "name": "dateSigned",
-	     "title": {
-	      "nl": "Datum ondertekening"
-	     },
-	     "isRequired": true,
-	     "validators": [
-	     	{
-	     		"type": "expression", 
-	     		"expression": "isDateMoreThanCurrent({dateSigned}) = true", 
-	     		"text": "De datum mag niet in het verleden liggen"
-	     	}
-	     ],
-	     "inputType": "date"
-	    },
-	    {
-	     "type": "text",
-	     "name": "placeSigned",
-	     "title": {
-	      "nl": "Plaats ondertekening"
-	     },
-	     "isRequired": true
-	    },
-	    {
-	     "type": "text",
-	     "name": "signedBy",
-	     "title": {
-	      "nl": "Ondertekend door"
-	     },
-	     "description": {
-	      "nl": "De ouder/verzorger voor leden jonger dan 18 jaar ondertekenen voor nieuwe jeugdleden"
-	     },
-	     "isRequired": true
-	    },
-	    {
-	     "type": "signaturepad",
-	     "name": "signature",
-	     "storeDataAsText": false,
-	     "title": {
-	      "nl": "Handtekening"
-	     },
-	     "isRequired": true,
-	     "description": "Teken je handtekening in de ruimte hieronder",
-     	 "requiredErrorText": "Teken je handtekening in de ruimte onder de vraag met je muis, of als je een touchscreen hebt, met je vinger"
-	    }
-	   ],
-	   "title": {
-	    "nl": "Ondertekening"
-	   }
-	  }
-	 ],
-	 "showQuestionNumbers": "off"
-	}
-	this.auth.authState.subscribe(user => {
+ 	this.auth.authState.subscribe(user => {
 		if(user){
-			this.userId = user.uid;
-	  		this.fetchUserResults();
-	  		this.initiateSurvey();
+			this.form = this.db.collection('forms').doc('registration').valueChanges().subscribe((form: any) => {
+		 		if(form){
+		 			this.json = form.json;
+		 			this.userId = user.uid;
+			  		this.fetchUserResults();
+			  		this.initiateSurvey();
+		 		}
+		 	});
 		}
 	})
+  }
 
+  ngOnDestroy() {
+  	if(this.sub && !this.sub.closed){
+  		this.sub.unsubscribe();
+  	}
+  	if(this.form && !this.form.closed){
+  		this.form.unsubscribe();
+  	}
   }
 
   login(){
@@ -361,6 +100,10 @@ export class AppComponent implements OnInit {
           "prev": "btn-secondary",
           "next": "btn-primary",
           "start": "btn-primary"
+        },
+        paneldynamic: {
+        	"buttonAdd": "btn-success",
+        	"buttonRemove": "btn-danger"
         }
 
     };

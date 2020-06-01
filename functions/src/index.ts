@@ -10,7 +10,7 @@ const db = admin.firestore();
 const Excel = require('exceljs');
 
 const adminEmailAddress = 'ledenadministratie@tennisclub7.nl'
-
+// const adminEmailAddress = 'roeland@handihow.com';
 
 export const sendEmails = functions.firestore.document('registrations/{id}').onWrite(async (change, context) => {
 	const newValue = change.after.data();
@@ -75,7 +75,8 @@ export const sendEmails = functions.firestore.document('registrations/{id}').onW
 	          placeSigned: data.placeSigned,
 	          dateSigned: safeDateTransform(data.dateSigned),
 	          currentRatingSingles: data.currentRatingSingles ? data.currentRatingSingles : '-',
-	          currentRatingDoubles: data.currentRatingDoubles ? data.currentRatingDoubles : '-'
+	          currentRatingDoubles: data.currentRatingDoubles ? data.currentRatingDoubles : '-',
+	          teammembers: data.teammembers ? data.teammembers : '-'
         };
 		const msgToNewMember = {
 			// to: data.email,
@@ -150,7 +151,9 @@ const createExcel = async () => {
 		  { header: 'Lidmaatschap', key: 'membershipType', width: 30},
 		  { header: 'Lid per', key: 'date', width: 10},
 		  { header: 'Enkelspel', key: 'currentRatingSingles', width: 10},
-		  { header: 'Dubbelspel', key: 'currentRatingDoubles', width: 10}
+		  { header: 'Dubbelspel', key: 'currentRatingDoubles', width: 10},
+		  { header: 'Pasfoto', key: 'imageUrl', width: 20},
+		  { header: 'Teamleden', key: 'teammembers', width: 50}
 		];
 		const registrationRecords = registrationSnap.docs.map(d => d.data());
 		registrationRecords.forEach(record => {
@@ -168,7 +171,14 @@ const createExcel = async () => {
 	          membershipType: data.membershipType,
 	          date: safeDateTransform(data.date),
 	          currentRatingSingles: data.currentRatingSingles ? data.currentRatingSingles : '-',
-	          currentRatingDoubles: data.currentRatingDoubles ? data.currentRatingDoubles : '-'
+	          currentRatingDoubles: data.currentRatingDoubles ? data.currentRatingDoubles : '-',
+	          imageUrl: data.image && data.image[0] && data.image[0].content ? 
+	          	{
+				  text: 'link naar pasfoto',
+				  hyperlink: data.image[0].content,
+				  tooltip: 'link naar pasfoto'
+				} : '-',
+			  teammembers: data.teammembers ? data.teammembers : '-'
 			});
 		});
 		return workbook.xlsx.writeBuffer()
