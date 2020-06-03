@@ -60,23 +60,23 @@ export const sendEmails = functions.firestore.document('registrations/{id}').onW
 			console.error(e.toString());
 		}		
 		const dynamicData = {
-			  email: data.email,
-	          firstName: data.firstName,
-	          lastName: data.lastName,
-	          gender: data.gender,
+			  email: safeTextTransform(data.email),
+	          firstName: safeTextTransform(data.firstName),
+	          lastName: safeTextTransform(data.lastName),
+	          gender: safeTextTransform(data.gender),
 	          birthDate: safeDateTransform(data.birthDate),
-	          address: data.address,
-	          postalCode: data.postalCode,
-	          city: data.city,
-	          mobilePhoneNumber: data.mobilePhoneNumber,
-	          membershipType: data.membershipType,
+	          address: safeTextTransform(data.address),
+	          postalCode: safeTextTransform(data.postalCode),
+	          city: safeTextTransform(data.city),
+	          mobilePhoneNumber: safeTextTransform(data.mobilePhoneNumber),
+	          membershipType: safeTextTransform(data.membershipType),
 	          date: safeDateTransform(data.date),
-	          signedBy: data.signedBy,
-	          placeSigned: data.placeSigned,
+	          signedBy: safeTextTransform(data.signedBy),
+	          placeSigned: safeTextTransform(data.placeSigned),
 	          dateSigned: safeDateTransform(data.dateSigned),
-	          currentRatingSingles: data.currentRatingSingles ? data.currentRatingSingles : '-',
-	          currentRatingDoubles: data.currentRatingDoubles ? data.currentRatingDoubles : '-',
-	          teammembers: data.teammembers ? data.teammembers : '-'
+	          currentRatingSingles: safeTextTransform(data.currentRatingSingles),
+	          currentRatingDoubles: safeTextTransform(data.currentRatingDoubles),
+	          teammembers: safeTextTransform(data.teammembers)
         };
 		const msgToNewMember = {
 			// to: data.email,
@@ -128,6 +128,14 @@ const safeDateTransform = (date: string) : string => {
 	return safeDateString
 }
 
+const safeTextTransform = (text: string) : string => {
+	let safeTextString = '-';
+	if(text){
+		safeTextString = text;
+	}
+	return safeTextString;
+}
+
 const createExcel = async () => {
 	const registrationSnap = await db.collection('registrations').orderBy('updatedAt', 'asc').get();
 	if(registrationSnap.empty){
@@ -158,28 +166,30 @@ const createExcel = async () => {
 		const registrationRecords = registrationSnap.docs.map(d => d.data());
 		registrationRecords.forEach(record => {
 			const data = record.data;
-			sheet.addRow({
-			  email: data.email,
-	          firstName: data.firstName,
-	          lastName: data.lastName,
-	          gender: data.gender,
-	          birthDate: safeDateTransform(data.birthDate),
-	          address: data.address,
-	          postalCode: data.postalCode,
-	          city: data.city,
-	          mobilePhoneNumber: data.mobilePhoneNumber,
-	          membershipType: data.membershipType,
-	          date: safeDateTransform(data.date),
-	          currentRatingSingles: data.currentRatingSingles ? data.currentRatingSingles : '-',
-	          currentRatingDoubles: data.currentRatingDoubles ? data.currentRatingDoubles : '-',
-	          imageUrl: data.image && data.image[0] && data.image[0].content ? 
-	          	{
-				  text: 'link naar pasfoto',
-				  hyperlink: data.image[0].content,
-				  tooltip: 'link naar pasfoto'
-				} : '-',
-			  teammembers: data.teammembers ? data.teammembers : '-'
-			});
+			if(data.isFinished){
+				sheet.addRow({
+				  email: safeTextTransform(data.email),
+		          firstName: safeTextTransform(data.firstName),
+		          lastName: safeTextTransform(data.lastName),
+		          gender: safeTextTransform(data.gender),
+		          birthDate: safeDateTransform(data.birthDate),
+		          address: safeTextTransform(data.address),
+		          postalCode: safeTextTransform(data.postalCode),
+		          city: safeTextTransform(data.city),
+		          mobilePhoneNumber: safeTextTransform(data.mobilePhoneNumber),
+		          membershipType: safeTextTransform(data.membershipType),
+		          date: safeDateTransform(data.date),
+		          currentRatingSingles: safeTextTransform(data.currentRatingSingles),
+		          currentRatingDoubles: safeTextTransform(data.currentRatingDoubles),
+		          imageUrl: data.image && data.image[0] && data.image[0].content ? 
+		          	{
+					  text: 'link naar pasfoto',
+					  hyperlink: data.image[0].content,
+					  tooltip: 'link naar pasfoto'
+					} : '-',
+				  teammembers: safeTextTransform(data.teammembers)
+				});
+			}
 		});
 		return workbook.xlsx.writeBuffer()
 		.then((buffer: Buffer) => {
